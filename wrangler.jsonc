@@ -1,0 +1,42 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cf-button-probe",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-04-17",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+
+  // The whole point of the probe: an image built from a Dockerfile in the repo.
+  // If a button deploy cannot do this, the container never starts and /api/container 500s.
+  "containers": [
+    {
+      "class_name": "Probe",
+      "image": "./Dockerfile",
+      "instance_type": "dev",
+      "max_instances": 1
+    }
+  ],
+
+  "durable_objects": {
+    "bindings": [{ "name": "PROBE", "class_name": "Probe" }]
+  },
+  "migrations": [{ "tag": "probe-v1", "new_sqlite_classes": ["Probe"] }],
+
+  // Deliberately carries a placeholder id, the way a template repo would:
+  // we want to see whether the button provisions a fresh namespace and rewrites it.
+  "kv_namespaces": [{ "binding": "PROBE_KV", "id": "0000000000000000000000000000cafe" }],
+
+  "ai": { "binding": "AI" },
+
+  "triggers": { "crons": ["*/10 * * * *"] },
+
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+
+  "vars": {
+    "PROBE_MODE": "container"
+  }
+}

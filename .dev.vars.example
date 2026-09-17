@@ -1,0 +1,8 @@
+# The Deploy to Cloudflare setup page reads this file to decide which secrets
+# to prompt for. Both values here are arbitrary — the probe only reports
+# whether they arrived.
+
+# Any non-empty string.
+PROBE_SECRET=
+# Generate with: openssl rand -base64 32
+PROBE_REGISTRY_KEY=

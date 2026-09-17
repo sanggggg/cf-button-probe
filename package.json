@@ -2,25 +2,30 @@
   "name": "cf-button-probe",
   "version": "0.1.0",
   "private": true,
-  "description": "Probe: does a Deploy to Cloudflare button build a container image from a Dockerfile?",
+  "description": "Probe: the same repo with no container, for a free-plan account",
   "type": "module",
   "scripts": {
     "deploy": "wrangler deploy",
     "dry": "wrangler deploy --dry-run"
   },
-  "dependencies": {
-    "@cloudflare/containers": "^0.3.7"
-  },
+  "dependencies": {},
   "devDependencies": {
     "wrangler": "^4.133.0"
   },
   "cloudflare": {
     "label": "Container build probe",
-    "products": ["Workers", "Containers", "Durable Objects", "KV", "Workers AI"],
+    "products": [
+      "Workers",
+      "KV",
+      "Workers AI"
+    ],
     "bindings": {
-      "PROBE_KV": { "description": "Scratch KV namespace. Provisioned for you; nothing is stored in it." },
-      "AI": { "description": "Workers AI. Bound only to check that the binding survives a button deploy." },
-      "PROBE": { "description": "Durable Object that owns the container instance." }
+      "PROBE_KV": {
+        "description": "Scratch KV namespace. Provisioned for you; nothing is stored in it."
+      },
+      "AI": {
+        "description": "Workers AI. Bound only to check that the binding survives a button deploy."
+      }
     }
   }
 }

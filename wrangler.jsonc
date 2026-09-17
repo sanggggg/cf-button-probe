@@ -1,29 +1,16 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "cf-button-probe",
+  "name": "cf-button-probe-free",
   "main": "src/index.ts",
   "compatibility_date": "2026-04-17",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
 
-  // The whole point of the probe: an image built from a Dockerfile in the repo.
-  // If a button deploy cannot do this, the container never starts and /api/container 500s.
-  "containers": [
-    {
-      "class_name": "Probe",
-      "image": "./Dockerfile",
-      "instance_type": "dev",
-      "max_instances": 1
-    }
-  ],
+  // No `containers` and no Durable Object: everything below is meant to be
+  // reachable on a free-plan account. The container branches are `main` and
+  // `sandbox`.
 
-  "durable_objects": {
-    "bindings": [{ "name": "PROBE", "class_name": "Probe" }]
-  },
-  "migrations": [{ "tag": "probe-v1", "new_sqlite_classes": ["Probe"] }],
-
-  // Deliberately carries a placeholder id, the way a template repo would:
-  // we want to see whether the button provisions a fresh namespace and rewrites it.
+  // Placeholder id, the way a template repo would carry one.
   "kv_namespaces": [{ "binding": "PROBE_KV", "id": "0000000000000000000000000000cafe" }],
 
   "ai": { "binding": "AI" },
@@ -37,6 +24,6 @@
   },
 
   "vars": {
-    "PROBE_MODE": "container"
+    "PROBE_MODE": "free"
   }
 }

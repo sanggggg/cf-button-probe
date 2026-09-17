@@ -18,8 +18,19 @@ export default {
     if (url.pathname === "/api/container") {
       try {
         const sandbox = getSandbox(env.Sandbox, "probe");
-        const result = await sandbox.exec("echo container-up && rg --version | head -1");
-        return Response.json({ container: "up", stdout: result.stdout, exitCode: result.exitCode });
+        // argv array, then read the process — `exec("some string")` is rejected by the SDK.
+        const process = await sandbox.exec([
+          "/bin/bash",
+          "-lc",
+          "echo container-up && rg --version | head -1",
+        ]);
+        const output = await process.output({ encoding: "utf8" });
+        return Response.json({
+          container: "up",
+          builtFrom: "cloudflare/sandbox:next + apt-get, built in Workers Builds",
+          stdout: output.stdout,
+          exitCode: output.exitCode,
+        });
       } catch (error) {
         return Response.json(
           { container: "failed", error: error instanceof Error ? error.message : String(error) },

@@ -10,17 +10,17 @@
   // If a button deploy cannot do this, the container never starts and /api/container 500s.
   "containers": [
     {
-      "class_name": "Probe",
+      "class_name": "Sandbox",
       "image": "./Dockerfile",
-      "instance_type": "dev",
+      "instance_type": "standard-1",
       "max_instances": 1
     }
   ],
 
   "durable_objects": {
-    "bindings": [{ "name": "PROBE", "class_name": "Probe" }]
+    "bindings": [{ "name": "Sandbox", "class_name": "Sandbox" }]
   },
-  "migrations": [{ "tag": "probe-v1", "new_sqlite_classes": ["Probe"] }],
+  "migrations": [{ "tag": "probe-v1", "new_sqlite_classes": ["Sandbox"] }],
 
   // Deliberately carries a placeholder id, the way a template repo would:
   // we want to see whether the button provisions a fresh namespace and rewrites it.
@@ -37,6 +37,6 @@
   },
 
   "vars": {
-    "PROBE_MODE": "container"
+    "PROBE_MODE": "sandbox"
   }
 }

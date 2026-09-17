@@ -1,7 +1,7 @@
-import { Container, getContainer } from "@cloudflare/containers";
+import { getSandbox, Sandbox as BaseSandbox } from "@cloudflare/sandbox";
 
 interface Env {
-  PROBE: DurableObjectNamespace<Probe>;
+  Sandbox: DurableObjectNamespace<Sandbox>;
   PROBE_KV: KVNamespace;
   AI: Ai;
   PROBE_MODE: string;
@@ -9,22 +9,17 @@ interface Env {
   PROBE_REGISTRY_KEY?: string;
 }
 
-export class Probe extends Container {
-  defaultPort = 8080;
-  sleepAfter = "2m";
-}
+export class Sandbox extends BaseSandbox {}
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    // Did the image build, push and start? This is the probe's verdict line.
     if (url.pathname === "/api/container") {
-      if (env.PROBE_MODE !== "container") {
-        return Response.json({ container: "absent", mode: env.PROBE_MODE }, { status: 501 });
-      }
       try {
-        return await getContainer(env.PROBE).fetch(request);
+        const sandbox = getSandbox(env.Sandbox, "probe");
+        const result = await sandbox.exec("echo container-up && rg --version | head -1");
+        return Response.json({ container: "up", stdout: result.stdout, exitCode: result.exitCode });
       } catch (error) {
         return Response.json(
           { container: "failed", error: error instanceof Error ? error.message : String(error) },
@@ -33,8 +28,6 @@ export default {
       }
     }
 
-    // Did the other bindings survive the deploy, and did the setup page's
-    // secret prompts actually land as secrets?
     if (url.pathname === "/api/health") {
       return Response.json({
         mode: env.PROBE_MODE,
@@ -45,11 +38,10 @@ export default {
       });
     }
 
-    return new Response("cf-button-probe. Try /api/health and /api/container.", {
+    return new Response("cf-button-probe (sandbox image). Try /api/health and /api/container.", {
       headers: { "content-type": "text/plain" },
     });
   },
 
-  // Present only to check that a button deploy carries cron triggers over.
   async scheduled(): Promise<void> {},
 };

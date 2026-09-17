@@ -1,8 +1,10 @@
-# Deliberately tiny: this branch isolates the MECHANISM (does a button deploy build
-# and push an image at all?) from image size and build time. The `sandbox` branch
-# carries the real, large image instead.
-FROM node:22-alpine
-WORKDIR /app
-COPY container/server.js ./server.js
-EXPOSE 8080
-CMD ["node", "server.js"]
+# The image cloud-tag actually ships: large, and its build needs network for apt.
+# `main` proves a button can build *an* image; this branch proves it can build
+# *this* one, inside whatever time and size limits Workers Builds enforces.
+FROM docker.io/cloudflare/sandbox:next
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ripgrep \
+  && rm -rf /var/lib/apt/lists/*
+
+# Never override ENTRYPOINT — it runs the SDK's in-container control server.
